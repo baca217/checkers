@@ -16,7 +16,7 @@ public abstract class Piece
     }
     //methods
     public abstract boolean isMoveLegal(GameState gameState, Move move);
-    public abstract void makeMove(GameState, Move move);
+    public abstract void makeMove(GameState gameState, Move move);
     @Override public String toString()
     {
         return getColor() == Color.LIGHT ? lightSymbol : darkSymbol;

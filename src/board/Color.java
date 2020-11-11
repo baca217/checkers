@@ -1,6 +1,6 @@
 package board;
 
-public class Color
+public enum Color
 {
     LIGHT, DARK;
     public Color opponent()
