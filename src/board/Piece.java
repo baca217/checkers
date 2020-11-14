@@ -1,5 +1,7 @@
 package board;
 
+import java.util.ArrayList;
+
 public abstract class Piece
 {
     private final Color color;
@@ -20,6 +22,23 @@ public abstract class Piece
     @Override public String toString()
     {
         return getColor() == Color.LIGHT ? lightSymbol : darkSymbol;
+    }
+    public ArrayList<GameState> getSuccessors(GameState gameState, Position myPosition)
+    {
+        ArrayList<GameState> successors = new ArrayList<>();
+
+        for( Position position : gameState.getAllPossiblePositions())
+        {
+            Move move = new Move(myPosition,position);
+            if( gameState.isMoveLegal(move))
+            {
+                GameState copy = gameState.copy();
+                copy.setPrev(gameState);
+                copy.makeMove(move);
+                successors.add(copy);
+            }
+        }
+        return successors;
     }
     //getters
     public int getValue() { return value; }
