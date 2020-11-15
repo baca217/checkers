@@ -4,6 +4,8 @@ import org.ietf.jgss.GSSName;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
+import board.Piece;
 
 public abstract class GameState {
     private GameState prev, future;
@@ -13,11 +15,29 @@ public abstract class GameState {
     //constructors
     public GameState()
     {
-        this(0, 0);
+        this(8, 8);
     }
     public GameState(int boardWidth, int boardHeight)
     {
         squares = new Piece[boardWidth][boardHeight];
+    }
+    public GameState(int boardWidth, int boardHeight, String arrangement, Piece[] pieces) {
+        this(boardWidth, boardHeight); //create board
+        HashMap<String, Piece> symbols = new HashMap<>();
+        for(Piece piece : pieces) {
+            symbols.put(piece.toString(), piece); //string of piece = obj of piece
+        }
+        symbols.put(" ", null); //must add a space for empty squares
+        int pointer = 0;
+        //use the sequence of chess symbols to place the correct piece to each square
+        for (int y = boardHeight-1; y >= 0; y--) {
+            for (int x = 0; x < boardWidth; x++) {
+                String symbol = arrangement.charAt(pointer++)+"";
+                while(!symbols.containsKey(symbol)) //check if key symbol exists
+                    symbol = arrangement.charAt(pointer++)+"";
+                setPiece(new Position(x, y), symbols.get(symbol)); //set piece to position on board
+            }
+        }
     }
     //methods
     public boolean isMoveLegal(Move move)
@@ -50,7 +70,7 @@ public abstract class GameState {
             {
                 for(int y = 0; y < squares[x].length; y++)
                 {
-                    copy.squares[x][y] = squares[x][y];
+                    copy.squares[x][y] = squares[x][y]; //copying pieces between constructors
                 }
             }
         } catch (Exception e)
@@ -64,12 +84,13 @@ public abstract class GameState {
     {
         ArrayList<Position> positions = new ArrayList<>();
 
-        for (Position position : getAllPossiblePositions())
+        for (Position position : getAllPossiblePositions()) //going through the whole board
         {
             Piece piece = getPiece(position);
             if (piece  != null && piece.getColor() == playerColor)
-                position.add(position);
+                positions.add(position);
         }
+        return positions; //pieces that belong to player
     }
     public ArrayList<Position> getAllPossiblePositions()
     {
@@ -82,12 +103,12 @@ public abstract class GameState {
                 positions.add(new Position(x, y));
             }
         }
-        return positions;
+        return positions; //return all possible positions
     }
     public boolean equals(GameState other)
     {
-        return playerTurn == other.playerTurn
-                && Arrays.deepEquals(squares, other.squares);
+        return playerTurn == other.playerTurn //player turns are equal
+                && Arrays.deepEquals(squares, other.squares); //boards are equal
     }
     public boolean isTerminal()
     {
@@ -104,9 +125,10 @@ public abstract class GameState {
                     blackFound = true;
             }
         }
-        return !whiteFound || !blackFound;
+        return !whiteFound || !blackFound; //if one player has no pieces, returns true, else false
     }
-    public double evaluate(Color maximizingPlayer)
+    public double evaluate(Color maximizingPlayer) //count how much the player is winning or losing by, based on
+            //the value of the pieces
     {
         int score = 0;
         for(Position position : getAllPossiblePositions())
@@ -120,7 +142,7 @@ public abstract class GameState {
         }
         return score;
     }
-    public ArrayList<GameState> getSuccessors()
+    public ArrayList<GameState> getSuccessors() //get all possible moves for available pieces
     {
         ArrayList<GameState> successors = new ArrayList<>();
 
@@ -129,9 +151,27 @@ public abstract class GameState {
             Piece piece = getPiece(position);
             if( piece != null && piece.getColor() == getPlayerTurn())
             {
-                successors.addAll(piece.getSuccesors(this, position));
+                successors.addAll(piece.getSuccessors(this, position));
             }
         }
+        return successors;
+    }
+    @Override public String toString() { //build board out of string
+        String files = "  a b c d e f g h"; //the column headings
+        StringBuilder sb = new StringBuilder(files + "\n");
+        for (int y = 7; y >= 0; y--) {
+            sb.append( (y+1) +"|"); //add the left-side ranks (row numbers)
+            for (int x = 0; x < 8; x++) {
+                if(squares[x][y] != null) {
+                    sb.append(squares[x][y] + "|");
+                }else {
+                    sb.append(" |");
+                }
+            }
+            sb.append(y+1 + "\n");  //add the right-side ranks (row numbers)
+        }
+        sb.append(files);
+        return sb.toString();
     }
     //getters and setters
     public GameState getPrev() { return prev; }
@@ -146,8 +186,8 @@ public abstract class GameState {
     public Piece getPiece(Position position) { return squares[position.getX()][position.getY()]; }
     public void setPiece(Position position, Piece piece)
     {
-
+        squares[position.getX()][position.getY()]=  piece;
     }
     public int getBoardWidth() { return squares.length; }
-    public int getBoardLength() { return squares[0].length; }
+    public int getBoardHeight() { return squares[0].length; }
 }

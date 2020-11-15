@@ -38,7 +38,7 @@ public abstract class Piece
                 successors.add(copy);
             }
         }
-        return successors;
+        return successors; //return all possible moves for available pieces
     }
     //getters
     public int getValue() { return value; }
