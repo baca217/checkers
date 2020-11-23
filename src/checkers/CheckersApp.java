@@ -21,29 +21,34 @@ public class CheckersApp extends Application
     private Parent createContent()
     {
         Pane root = new Pane();
-        root.setPrefSize(WIDTH * TILE_SIZE, HEIGHT * TILE_SIZE);
-        root.getChildren().addAll(tileGroup, pieceGroup);
+        root.setPrefSize(WIDTH * TILE_SIZE, HEIGHT * TILE_SIZE); //create screen
+        root.getChildren().addAll(tileGroup, pieceGroup); //adding tile and pieces containers
 
-        for (int y = 0; y < HEIGHT; y++) {
-            for (int x = 0; x < WIDTH; x++) {
-                Tile tile = new Tile((x + y) % 2 == 0, x, y);
-                board[x][y] = tile;
+        for (int y = 0; y < HEIGHT; y++)
+        {
+            for (int x = 0; x < WIDTH; x++)
+            {
+                Tile tile = new Tile((x + y) % 2 == 0, x, y); //create tile
+                board[x][y] = tile; //place tile
 
-                tileGroup.getChildren().add(tile);
+                tileGroup.getChildren().add(tile); //add tile to group
 
                 Piece piece = null;
 
-                if (y <= 2 && (x + y) % 2 != 0) {
+                if (y <= 2 && (x + y) % 2 != 0) //populating red checkers pieces
+                {
                     piece = makePiece(PieceType.RED, x, y);
                 }
 
-                if (y >= 5 && (x + y) % 2 != 0) {
+                if (y >= 5 && (x + y) % 2 != 0) //populating white checkers pieces
+                {
                     piece = makePiece(PieceType.WHITE, x, y);
                 }
 
-                if (piece != null) {
-                    tile.setPiece(piece);
-                    pieceGroup.getChildren().add(piece);
+                if (piece != null)
+                {
+                    tile.setPiece(piece); //assigning tile a piece
+                    pieceGroup.getChildren().add(piece); //add piece to group and board
                 }
             }
         }

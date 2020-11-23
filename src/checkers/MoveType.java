@@ -1,5 +1,6 @@
 package checkers;
 
-public enum MoveType {
+public enum MoveType
+{
     NONE, NORMAL, KILL
 }

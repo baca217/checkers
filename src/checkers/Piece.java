@@ -3,11 +3,11 @@ package checkers;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Ellipse;
+import static checkers.CheckersApp.TILE_SIZE;
 
 public class Piece extends StackPane
 {
     //variables
-    public static final int TILE_SIZE = 100;
     private PieceType type;
     private double mouseX, mouseY;
     private double oldX, oldY;
@@ -18,7 +18,8 @@ public class Piece extends StackPane
     public double getOldX() { return oldX; }
     public double getOldY() { return oldY; }
     //constructor
-    public Piece(PieceType type, int x, int y) {
+    public Piece(PieceType type, int x, int y)
+    {
         this.type = type;
         move(x, y); //initial position
         Ellipse bg = new Ellipse(TILE_SIZE * 0.3125, TILE_SIZE * 0.26); //shadow of piece

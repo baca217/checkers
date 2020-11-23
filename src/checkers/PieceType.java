@@ -1,6 +1,7 @@
 package checkers;
 
-public enum PieceType {
+public enum PieceType
+{
     RED(1), WHITE(-1);
 
     final int moveDir;

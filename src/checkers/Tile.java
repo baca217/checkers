@@ -15,7 +15,7 @@ public class Tile extends Rectangle
 
         relocate(x * CheckersApp.TILE_SIZE, y * CheckersApp.TILE_SIZE); //move tiles around to fit board
 
-        setFill(light ? Color.valueOf("#ffccbb") : Color.valueOf("#eeffbb"));
+        setFill(light ? Color.valueOf("#ffccbb") : Color.valueOf("#eeffbb")); ///set color of tile
     }
     //methods
     public boolean hasPiece() {
