@@ -8,18 +8,18 @@ import javafx.scene.Scene;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 
-public class CheckersApp extends Application {
-
+public class CheckersApp extends Application
+{
+    //variables
     public static final int TILE_SIZE = 100;
     public static final int WIDTH = 8;
     public static final int HEIGHT = 8;
-
     private Tile[][] board = new Tile[WIDTH][HEIGHT];
-
     private Group tileGroup = new Group();
     private Group pieceGroup = new Group();
-
-    private Parent createContent() {
+    //methods
+    private Parent createContent()
+    {
         Pane root = new Pane();
         root.setPrefSize(WIDTH * TILE_SIZE, HEIGHT * TILE_SIZE);
         root.getChildren().addAll(tileGroup, pieceGroup);
