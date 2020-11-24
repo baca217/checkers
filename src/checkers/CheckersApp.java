@@ -66,9 +66,8 @@ public class CheckersApp extends Application
 
         int x0 = toBoard(piece.getOldX());
         int y0 = toBoard(piece.getOldY());
-
         if(piece.getKingStatus())
-        {
+        {//piece is a king, can move in any direction
             if (Math.abs(newX - x0) == 1 && Math.abs(newY - y0) == 1)
             { //check if move is valid
                 return new MoveResult(MoveType.NORMAL);
@@ -83,7 +82,7 @@ public class CheckersApp extends Application
             }
         }
         else
-        {
+        {//piece is not king, must check move direction
             if (Math.abs(newX - x0) == 1 && newY - y0 == piece.getType().moveDir)
             { //check if move is valid
                 return new MoveResult(MoveType.NORMAL);
