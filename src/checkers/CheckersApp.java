@@ -1,12 +1,10 @@
 package checkers;
-import checkers.*;
 
 import javafx.application.Application;
 import javafx.scene.Group;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.layout.Pane;
-import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 
 public class CheckersApp extends Application
@@ -18,6 +16,7 @@ public class CheckersApp extends Application
     private Tile[][] board = new Tile[WIDTH][HEIGHT];
     private Group tileGroup = new Group();
     private Group pieceGroup = new Group();
+    private PieceType pieceTurn = PieceType.RED;
     //methods
     private Parent createContent()
     {
@@ -53,57 +52,8 @@ public class CheckersApp extends Application
                 }
             }
         }
-
         return root;
     }
-
-    private MoveResult tryMove(Piece piece, int newX, int newY)
-    {
-        if (board[newX][newY].hasPiece() || (newX + newY) % 2 == 0) //no move on odd tiles
-        {
-            return new MoveResult(MoveType.NONE);
-        }
-
-        int x0 = toBoard(piece.getOldX());
-        int y0 = toBoard(piece.getOldY());
-        if(piece.getKingStatus())
-        {//piece is a king, can move in any direction
-            if (Math.abs(newX - x0) == 1 && Math.abs(newY - y0) == 1)
-            { //check if move is valid
-                return new MoveResult(MoveType.NORMAL);
-            } else if (Math.abs(newX - x0) == 2 && Math.abs(newY - y0) == 2)
-            {//check if kill move is valid
-                int x1 = x0 + (newX - x0) / 2;
-                int y1 = y0 + (newY - y0) / 2;
-                if (board[x1][y1].hasPiece() && board[x1][y1].getPiece().getType() != piece.getType())
-                {//check if piece exists and is an enemy
-                    return new MoveResult(MoveType.KILL, board[x1][y1].getPiece());//remove enemy
-                }
-            }
-        }
-        else
-        {//piece is not king, must check move direction
-            if (Math.abs(newX - x0) == 1 && newY - y0 == piece.getType().moveDir)
-            { //check if move is valid
-                return new MoveResult(MoveType.NORMAL);
-            } else if (Math.abs(newX - x0) == 2 && newY - y0 == piece.getType().moveDir * 2)
-            {//check if kill move is valid
-                int x1 = x0 + (newX - x0) / 2;
-                int y1 = y0 + (newY - y0) / 2;
-                if (board[x1][y1].hasPiece() && board[x1][y1].getPiece().getType() != piece.getType())
-                {//check if piece exists and is an enemy
-                    return new MoveResult(MoveType.KILL, board[x1][y1].getPiece());//remove enemy
-                }
-            }
-        }
-
-        return new MoveResult(MoveType.NONE);
-    }
-
-    private int toBoard(double pixel)
-    {
-        return (int)(pixel + TILE_SIZE / 2) / TILE_SIZE;
-    } //convert pixel coordinate to board coordinate
 
     @Override
     public void start(Stage primaryStage) throws Exception
@@ -114,71 +64,37 @@ public class CheckersApp extends Application
         primaryStage.show();
     }
 
+    public void updateBoard(int oldX, int oldY, int newX, int newY, Piece killedPiece)
+    {
+        Piece temp = board[oldX][oldY].getPiece();
+        board[oldX][oldY].setPiece(null); //remove piece from tile
+        board[newX][newY].setPiece(temp);//place piece on new tile
+        this.pieceTurn = (PieceType.RED == this.pieceTurn ? PieceType.WHITE : PieceType.RED);
+
+        if(killedPiece != null)
+        {
+            board[toBoard(killedPiece.getOldX())][toBoard(killedPiece.getOldY())].setPiece(null);//remove the piece from tile
+            pieceGroup.getChildren().remove(killedPiece); //remove piece from group
+        }
+    }
+
+    private int toBoard(double pixel)
+    {
+        return (int)(pixel + TILE_SIZE / 2) / TILE_SIZE;
+    } //convert pixel coordinate to board coordinate
+
     private Piece makePiece(PieceType type, int x, int y)
     {
-        Piece piece = new Piece(type, x, y); //placing new piece
-        piece.setOnMouseReleased(e ->
-        {
-            int newX = toBoard(piece.getLayoutX()); //piece coordinates
-            int newY = toBoard(piece.getLayoutY());
-            MoveResult result;
-
-            if (newX < 0 || newY < 0 || newX >= WIDTH || newY >= HEIGHT)
-            {//checks bounds of move
-                result = new MoveResult(MoveType.NONE);
-            } else {//check move validity
-                result = tryMove(piece, newX, newY);
-            }
-
-            int x0 = toBoard(piece.getOldX()); //old coordinates
-            int y0 = toBoard(piece.getOldY());
-
-            switch (result.getType())
-            {
-                case NONE://no move
-                    piece.abortMove();
-                    break;
-                case NORMAL://one tile move
-                    if(kingMe(newY, piece.getType()))
-                        piece.setKingStatus(true);
-                    piece.move(newX, newY);
-                    board[x0][y0].setPiece(null); //remove piece from tile
-                    board[newX][newY].setPiece(piece);//place piece on new tile
-                    break;
-                case KILL://two tile move
-                    if(kingMe(newY, piece.getType()))
-                        piece.setKingStatus(true);
-                    piece.move(newX, newY); //move the piece
-                    board[x0][y0].setPiece(null); //remove piece from tile
-                    board[newX][newY].setPiece(piece); //place piece on new tile
-
-                    Piece otherPiece = result.getPiece(); //piece to remove
-                    board[toBoard(otherPiece.getOldX())][toBoard(otherPiece.getOldY())].setPiece(null);//remove the piece from tile
-                    pieceGroup.getChildren().remove(otherPiece); //remove piece from group
-                    break;
-            }
-        });
+        Piece piece = new Piece(type, x, y, this); //placing new piece
         return piece;
     }
 
-    private boolean kingMe(int yPos, PieceType type)
-    {
-        switch (type)
-        {
-            case RED:
-                System.out.println("Red "+yPos);
-                return yPos == HEIGHT - 1;
-            case WHITE:
-                System.out.println("White "+yPos);
-                return yPos == 0;
-            default:
-                System.exit(-1);
-        }
-        System.exit(-1);
-        return false;
-    }
+    //getters
+    public Tile[][] getBoard(){return this.board;}
+    public PieceType getTurn(){return this.pieceTurn;}
 
-    public static void main(String[] args) {
+    public static void main(String[] args)
+    {
         launch(args);
     }
 }
