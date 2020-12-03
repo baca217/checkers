@@ -1,12 +1,16 @@
 package checkers;
 
 import javafx.application.Application;
+import javafx.fxml.FXMLLoader;
 import javafx.scene.Group;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
+import javafx.stage.StageStyle;
+
 import javax.swing.JOptionPane;
+import java.io.IOException;
 
 public class CheckersApp extends Application
 {
@@ -14,6 +18,8 @@ public class CheckersApp extends Application
     public static final int TILE_SIZE = 100;
     public static final int WIDTH = 8;
     public static final int HEIGHT = 8;
+    private String redPlayer1;
+    private String whitePlayer2;
     private Stage primaryStage;
     private Tile[][] board = new Tile[WIDTH][HEIGHT];
     private Group tileGroup = new Group();
@@ -21,7 +27,14 @@ public class CheckersApp extends Application
     private PieceType pieceTurn = PieceType.RED;
     private int redCount;
     private int whiteCount;
+
     //methods
+
+    public CheckersApp(String redPlayer1, String whitePlayer2) {
+        this.redPlayer1 = redPlayer1;
+        this.whitePlayer2 = whitePlayer2;
+    }
+
     private Parent createContent()
     {
         Pane root = new Pane();
@@ -125,29 +138,22 @@ public class CheckersApp extends Application
         }
     }
 
-    private void checkGameEnd(PieceType killed)
-    {
+    private void checkGameEnd(PieceType killed) {
         int result;
         if(killed == PieceType.RED)
             this.redCount--;
         if(killed == PieceType.WHITE)
             this.whiteCount--;
-        if(this.redCount == 0 || this.whiteCount == 0)
+        if(this.redCount >= 0 || this.whiteCount == 0)
         {
-            PieceType winner =( PieceType.RED == killed ? PieceType.WHITE : PieceType.RED);
-            JOptionPane.showMessageDialog(null, "Team "+winner.name()+" won!!!\nTeam "+killed.name()+" Lost");
-            result = JOptionPane.showConfirmDialog(null, "Would you like to play again?");
-            switch (result)
-            {
-                case JOptionPane.YES_OPTION:
-                    this.restart();
-                    break;
-                case JOptionPane.NO_OPTION:
-                case JOptionPane.CANCEL_OPTION:
-                case JOptionPane.CLOSED_OPTION:
-                    this.primaryStage.close();
-                    break;
+            try {
+                Parent root = FXMLLoader.load(getClass().getResource("../endGameScreen/end-game-ui.fxml"));
+                primaryStage.setScene(new Scene(root, 600, 400));
+                primaryStage.show();
+            } catch (IOException e) {
+                e.printStackTrace();
             }
+
         }
     }
 

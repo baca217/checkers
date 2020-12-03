@@ -2,6 +2,7 @@ package login;
 
 import checkers.CheckersApp;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -56,7 +57,10 @@ public class LoginController implements Initializable {
 
         Stage s = new Stage();
         try {
-            new CheckersApp().start(s);
+            Stage stage = (Stage) exitButton.getScene().getWindow();
+            stage.close();
+
+            new CheckersApp(player1Input.getText(), player2Input.getText()).start(s);
         } catch (Exception e) {
             e.printStackTrace();
         }
