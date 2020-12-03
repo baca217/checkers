@@ -54,7 +54,12 @@ public class LoginController implements Initializable {
             return;
         }
 
-        Application.launch(CheckersApp.class);
+        Stage s = new Stage();
+        try {
+            new CheckersApp().start(s);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public boolean checkInvalidNames(String name1, String name2) {
