@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Font?>
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="login.LoginController">
+   <left>
+       <AnchorPane prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+           <ImageView fx:id="checkerBoardView" fitHeight="544.0" fitWidth="323.0" layoutX="-2.0" pickOnBounds="true" preserveRatio="true">
+               <Image url="@../Images/MockUI.png" />
+           </ImageView>
+       </AnchorPane>
+   </left>
+   <right>
+       <AnchorPane prefHeight="400.0" prefWidth="279.0" style="-fx-background-color: ecece7;" BorderPane.alignment="CENTER">
+           <Label layoutX="12.0" layoutY="33.0" text="Welcome To Checkers!" textAlignment="CENTER">
+              <font>
+                  <Font name="System Bold" size="24.0" />
+              </font>
+           </Label>
+           <Label layoutX="108.0" layoutY="90.0" text="Player 1">
+              <font>
+                  <Font size="18.0" />
+              </font>
+           </Label>
+           <Label layoutX="108.0" layoutY="180.0" text="Player 2">
+              <font>
+                  <Font size="18.0" />
+              </font>
+           </Label>
+           <TextField fx:id="player1Input" layoutX="25.0" layoutY="129.0" prefHeight="26.0" prefWidth="231.0" />
+           <TextField fx:id="player2Input" layoutX="27.0" layoutY="210.0" prefHeight="26.0" prefWidth="226.0" />
+           <Button fx:id="exitButton" contentDisplay="CENTER" layoutX="160.0" layoutY="289.0" mnemonicParsing="false" onAction="#leaveLoginPage" prefHeight="43.0" prefWidth="89.0" style="-fx-background-color: #FF6666; -fx-border-color: #000000;" text="Exit Game" />
+           <Button fx:id="StartButton" contentDisplay="CENTER" layoutX="31.0" layoutY="289.0" mnemonicParsing="false" onAction="#startGame" prefHeight="43.0" prefWidth="89.0" style="-fx-background-color: #92B8DE; -fx-border-color: #000000;" text="Start Game!" />
+           <Label fx:id="invalidNameText" layoutX="84.0" layoutY="257.0" prefHeight="18.0" prefWidth="111.0" textAlignment="CENTER" textFill="#fc4848" />
+         <Label fx:id="invalidNameText1" layoutX="84.0" layoutY="253.0" prefHeight="18.0" prefWidth="111.0" textAlignment="CENTER" textFill="#fc4848" />
+       </AnchorPane>
+   </right>
+</BorderPane>
