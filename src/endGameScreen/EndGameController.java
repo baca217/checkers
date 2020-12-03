@@ -18,6 +18,7 @@ import javafx.stage.StageStyle;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.net.http.HttpClient;
 import java.util.ResourceBundle;
 
 public class EndGameController implements Initializable {
@@ -33,11 +34,22 @@ public class EndGameController implements Initializable {
     @FXML
     public Label numberOfWins;
 
+    private String winner;
+    private String loser;
+
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         File checkerBoardFile = new File("Images/MockUI.png");
         Image checkerBoardImage = new Image(checkerBoardFile.toURI().toString());
         checkerBoardView.setImage(checkerBoardImage);
+    }
+
+    public void init(GameResult gameResult) {
+        this.winner = gameResult.getWinner();
+        this.loser = gameResult.getLoser();
+
+        numberOfWins.setText(winner);
+
     }
 
     public void returnButton(ActionEvent event){
@@ -51,5 +63,9 @@ public class EndGameController implements Initializable {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public void getData(HttpClient client) {
+
     }
 }

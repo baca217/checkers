@@ -1,5 +1,7 @@
 package checkers;
 
+import endGameScreen.EndGameController;
+import endGameScreen.GameResult;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Group;
@@ -146,10 +148,22 @@ public class CheckersApp extends Application
             this.whiteCount--;
         if(this.redCount >= 0 || this.whiteCount == 0)
         {
+            primaryStage.close();
+
             try {
-                Parent root = FXMLLoader.load(getClass().getResource("../endGameScreen/end-game-ui.fxml"));
-                primaryStage.setScene(new Scene(root, 600, 400));
-                primaryStage.show();
+                FXMLLoader loader = new FXMLLoader();
+                loader.setLocation(getClass().getResource("../endGameScreen/end-game-ui.fxml"));
+                loader.load();
+                EndGameController endGameController = loader.getController();
+                if(whiteCount > 0) {
+                    endGameController.init(new GameResult(whitePlayer2, redPlayer1));
+                } else {
+                    endGameController.init(new GameResult(redPlayer1, whitePlayer2));
+                }
+                Parent parent = loader.getRoot();
+                Stage stage = new Stage();
+                stage.setScene(new Scene(parent, 600, 400));
+                stage.show();
             } catch (IOException e) {
                 e.printStackTrace();
             }

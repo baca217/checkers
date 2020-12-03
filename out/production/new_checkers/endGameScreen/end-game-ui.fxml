@@ -16,24 +16,24 @@
             </ImageView>
         </AnchorPane>
     </left>
-    <right>
+   <center>
         <AnchorPane prefHeight="400.0" prefWidth="279.0" style="-fx-background-color: ecece7;" BorderPane.alignment="CENTER">
             <Label layoutX="80.0" layoutY="35.0" text="Congrats!!" textAlignment="CENTER">
                 <font>
                     <Font name="System Bold" size="24.0" />
                 </font>
             </Label>
-            <Label fx:id="WinnerText" layoutX="12.0" layoutY="82.0" prefHeight="27.0" prefWidth="260.0" textAlignment="CENTER">
+            <Label fx:id="winnerText" layoutX="12.0" layoutY="82.0" prefHeight="27.0" prefWidth="260.0" textAlignment="CENTER">
                 <font>
                     <Font size="18.0" />
                 </font>
             </Label>
-            <Label fx:id="NumberOfWins" layoutX="3.0" layoutY="178.0" prefHeight="27.0" prefWidth="264.0">
+            <Label fx:id="numberOfWins" layoutX="3.0" layoutY="178.0" prefHeight="27.0" prefWidth="264.0">
                 <font>
                     <Font size="18.0" />
                 </font>
             </Label>
             <Button fx:id="returnButton" contentDisplay="CENTER" layoutX="94.0" layoutY="289.0" mnemonicParsing="false" onAction="#returnButton" prefHeight="43.0" prefWidth="89.0" style="-fx-background-color: #92B8DE; -fx-border-color: #000000;" text="Main Menu" />
         </AnchorPane>
-    </right>
+   </center>
 </BorderPane>
