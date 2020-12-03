@@ -6,6 +6,7 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
+import javax.swing.JOptionPane;
 
 public class CheckersApp extends Application
 {
@@ -13,10 +14,13 @@ public class CheckersApp extends Application
     public static final int TILE_SIZE = 100;
     public static final int WIDTH = 8;
     public static final int HEIGHT = 8;
+    private Stage primaryStage;
     private Tile[][] board = new Tile[WIDTH][HEIGHT];
     private Group tileGroup = new Group();
     private Group pieceGroup = new Group();
     private PieceType pieceTurn = PieceType.RED;
+    private int redCount;
+    private int whiteCount;
     //methods
     private Parent createContent()
     {
@@ -38,11 +42,13 @@ public class CheckersApp extends Application
                 if (y <= 2 && (x + y) % 2 != 0) //populating red checkers pieces
                 {
                     piece = makePiece(PieceType.RED, x, y);
+                    redCount++;
                 }
 
                 if (y >= 5 && (x + y) % 2 != 0) //populating white checkers pieces
                 {
                     piece = makePiece(PieceType.WHITE, x, y);
+                    whiteCount++;
                 }
 
                 if (piece != null)
@@ -58,10 +64,33 @@ public class CheckersApp extends Application
     @Override
     public void start(Stage primaryStage) throws Exception
     {
+        this.primaryStage = primaryStage;
         Scene scene = new Scene(createContent());
-        primaryStage.setTitle("CheckersApp");
-        primaryStage.setScene(scene);
-        primaryStage.show();
+        this.primaryStage.setTitle("CheckersApp");
+        this.primaryStage.setScene(scene);
+        this.primaryStage.show();
+    }
+
+    public void restart()
+    {
+        for(int y = 0; y < HEIGHT; y++)
+        {
+            for(int x = 0; x < WIDTH; x++)
+            {
+                Piece temp = board[x][y].getPiece();
+                if( temp != null)
+                {
+                    board[x][y].setPiece(null);
+                    pieceGroup.getChildren().remove(temp);
+                }
+            }
+        }
+        this.redCount = 0;
+        this.whiteCount = 0;
+        Scene scene = new Scene(createContent());
+        this.primaryStage.setTitle("CheckersApp");
+        this.primaryStage.setScene(scene);
+        this.primaryStage.show();
     }
 
     public void updateBoard(int oldX, int oldY, int newX, int newY, Piece killedPiece)
@@ -69,12 +98,56 @@ public class CheckersApp extends Application
         Piece temp = board[oldX][oldY].getPiece();
         board[oldX][oldY].setPiece(null); //remove piece from tile
         board[newX][newY].setPiece(temp);//place piece on new tile
+        System.out.println(newX+","+newY);
         this.pieceTurn = (PieceType.RED == this.pieceTurn ? PieceType.WHITE : PieceType.RED);
 
         if(killedPiece != null)
         {
+            System.out.println("white: "+whiteCount+" red: "+redCount);
             board[toBoard(killedPiece.getOldX())][toBoard(killedPiece.getOldY())].setPiece(null);//remove the piece from tile
             pieceGroup.getChildren().remove(killedPiece); //remove piece from group
+            checkGameEnd(killedPiece.getType());
+        }
+    }
+
+    private void checkStuck(PieceType color)
+    {
+        for(int x = 0; x < WIDTH; x++)
+        {
+            for(int y = 0; y < HEIGHT; y++)
+            {
+                Piece temp = board[x][y].getPiece();
+                if(temp != null && temp.getType() == color)
+                {
+
+                }
+            }
+        }
+    }
+
+    private void checkGameEnd(PieceType killed)
+    {
+        int result;
+        if(killed == PieceType.RED)
+            this.redCount--;
+        if(killed == PieceType.WHITE)
+            this.whiteCount--;
+        if(this.redCount == 0 || this.whiteCount == 0)
+        {
+            PieceType winner =( PieceType.RED == killed ? PieceType.WHITE : PieceType.RED);
+            JOptionPane.showMessageDialog(null, "Team "+winner.name()+" won!!!\nTeam "+killed.name()+" Lost");
+            result = JOptionPane.showConfirmDialog(null, "Would you like to play again?");
+            switch (result)
+            {
+                case JOptionPane.YES_OPTION:
+                    this.restart();
+                    break;
+                case JOptionPane.NO_OPTION:
+                case JOptionPane.CANCEL_OPTION:
+                case JOptionPane.CLOSED_OPTION:
+                    this.primaryStage.close();
+                    break;
+            }
         }
     }
 
@@ -92,9 +165,4 @@ public class CheckersApp extends Application
     //getters
     public Tile[][] getBoard(){return this.board;}
     public PieceType getTurn(){return this.pieceTurn;}
-
-    public static void main(String[] args)
-    {
-        launch(args);
-    }
 }
