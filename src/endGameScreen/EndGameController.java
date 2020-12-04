@@ -1,5 +1,9 @@
 package endGameScreen;
 
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -17,8 +21,13 @@ import javafx.stage.StageStyle;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
 import java.net.URL;
 import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.util.List;
+import java.util.Optional;
 import java.util.ResourceBundle;
 
 public class EndGameController implements Initializable {
@@ -47,7 +56,7 @@ public class EndGameController implements Initializable {
     public void init(GameResult gameResult) {
         this.winner = gameResult.getWinner();
         this.loser = gameResult.getLoser();
-
+        getData();
         numberOfWins.setText(winner);
 
     }
@@ -65,7 +74,27 @@ public class EndGameController implements Initializable {
         }
     }
 
-    public void getData(HttpClient client) {
 
+    public FinalInfo getData() {
+        ObjectMapper mapper = new ObjectMapper();
+        HttpClient client = HttpClient.newHttpClient();
+
+        try {
+            String JSON = mapper.writeValueAsString(new GameResult(winner, loser));
+            HttpRequest request = HttpRequest.newBuilder()
+                    .GET()
+                    .uri(URI.create("http://localhost:9999" + "/" + winner + "/" + loser))
+                    .build();
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+            FinalInfo listCar = mapper.readValue(response.body(), FinalInfo.class);
+
+            return listCar;
+
+        } catch (IOException | InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        return new FinalInfo(winner, -1);
     }
 }
