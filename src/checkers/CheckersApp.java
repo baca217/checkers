@@ -98,45 +98,96 @@ public class CheckersApp extends Application
         Piece temp = board[oldX][oldY].getPiece();
         board[oldX][oldY].setPiece(null); //remove piece from tile
         board[newX][newY].setPiece(temp);//place piece on new tile
-        System.out.println(newX+","+newY);
         this.pieceTurn = (PieceType.RED == this.pieceTurn ? PieceType.WHITE : PieceType.RED);
 
         if(killedPiece != null)
         {
-            System.out.println("white: "+whiteCount+" red: "+redCount);
             board[toBoard(killedPiece.getOldX())][toBoard(killedPiece.getOldY())].setPiece(null);//remove the piece from tile
             pieceGroup.getChildren().remove(killedPiece); //remove piece from group
-            checkGameEnd(killedPiece.getType());
+            if(killedPiece.getType() == PieceType.RED)
+                this.redCount--;
+            if(killedPiece.getType() == PieceType.WHITE)
+                this.whiteCount--;
+            System.out.println("white: "+whiteCount+" red: "+redCount);
         }
+        checkGameEnd();
     }
 
-    private void checkStuck(PieceType color)
+    private PieceType checkStuck()
     {
+        boolean redStuck = true;
+        boolean whiteStuck = true;
         for(int x = 0; x < WIDTH; x++)
         {
             for(int y = 0; y < HEIGHT; y++)
             {
-                Piece temp = board[x][y].getPiece();
-                if(temp != null && temp.getType() == color)
+                Piece temp = board[x][y].getPiece(); //checking if piece exists
+                if(temp != null)
                 {
+                    int curX = toBoard(temp.getOldX());
+                    int curY = toBoard(temp.getOldY());
+                    int movDir = (temp.getType() == PieceType.RED ? 1 : -1);
+                    int loop = (temp.getKingStatus() == true ? 2 : 1);
 
+                    for(int i = 0 ; i < loop; i++)
+                    {
+                        if(temp.tryMove(curX-1, curY+movDir).getType() != MoveType.NONE ||
+                                temp.tryMove(curX+1, curY+movDir).getType() != MoveType.NONE ||
+                                temp.tryMove(curX-2, curY+(movDir*2)).getType() != MoveType.NONE ||
+                                temp.tryMove(curX+2, curY+(movDir*2)).getType() != MoveType.NONE)
+                        {
+                            if (temp.getType() == PieceType.RED && redStuck == true)
+                                redStuck = false;
+                            else if (temp.getType() == PieceType.WHITE && whiteStuck == true)
+                                whiteStuck = false;
+                        }
+                        movDir *= -1;
+                    }
                 }
             }
         }
+        if(redStuck)
+            return PieceType.RED;
+        if(whiteStuck)
+            return  PieceType.WHITE;
+        return null;
     }
 
-    private void checkGameEnd(PieceType killed)
+    private void checkGameEnd()
     {
         int result;
-        if(killed == PieceType.RED)
-            this.redCount--;
-        if(killed == PieceType.WHITE)
-            this.whiteCount--;
-        if(this.redCount == 0 || this.whiteCount == 0)
+        PieceType winner;
+        PieceType loser;
+        String message = "";
+        PieceType stuck = checkStuck();
+        boolean gameOver = false;
+
+        if(this.redCount == 0 || this.whiteCount == 0) //win condition by enemy has no more pieces
         {
-            PieceType winner =( PieceType.RED == killed ? PieceType.WHITE : PieceType.RED);
-            JOptionPane.showMessageDialog(null, "Team "+winner.name()+" won!!!\nTeam "+killed.name()+" Lost");
-            result = JOptionPane.showConfirmDialog(null, "Would you like to play again?");
+            winner = (this.redCount == 0 ? PieceType.WHITE : PieceType.RED);
+            loser = (this.redCount == 0 ? PieceType.RED : PieceType.WHITE);
+            message = "Team "+winner.name()+" Won!\nTeam "+loser.name()+" Lost.\n";
+            gameOver = true;
+        }
+        else if( stuck != null)
+        {
+
+            message = "Team "+stuck.name()+" is stuck\n";
+            if(this.redCount == this.whiteCount)
+                message += "Even number of pieces on both sides\nGame is a draw!";
+            else
+            {
+                winner = (this.redCount > this.whiteCount ? PieceType.RED : PieceType.WHITE);
+                loser = (this.redCount > this.whiteCount ? PieceType.WHITE : PieceType.RED);
+                message += "Team " + winner + " has more Pieces\n";
+                message += "Team "+winner+" Won!\nTeam "+loser+" Lost.\n";
+            }
+            gameOver = true;
+        }
+        if(gameOver)
+        {
+            message += "\nWould you like to play again?";
+            result = JOptionPane.showConfirmDialog(null, message);
             switch (result)
             {
                 case JOptionPane.YES_OPTION:
