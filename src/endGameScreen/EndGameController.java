@@ -99,9 +99,10 @@ public class EndGameController implements Initializable {
                     .build();
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
-            FinalInfo listCar = mapper.readValue(response.body(), FinalInfo.class);
-
-            return listCar;
+            FinalInfo finalinfo = mapper.readValue(response.body(), FinalInfo.class);
+            numberOfWins = finalinfo.getWinsOverLoser();
+            
+            return finalinfo;
 
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
