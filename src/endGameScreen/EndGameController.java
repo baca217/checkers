@@ -1,13 +1,10 @@
 package endGameScreen;
 
-import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
-import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -17,7 +14,6 @@ import javafx.scene.image.ImageView;
 
 import javafx.event.ActionEvent;
 import javafx.stage.Stage;
-import javafx.stage.StageStyle;
 
 import java.io.File;
 import java.io.IOException;
@@ -26,8 +22,6 @@ import java.net.URL;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.util.List;
-import java.util.Optional;
 import java.util.ResourceBundle;
 
 public class EndGameController implements Initializable {
@@ -41,10 +35,11 @@ public class EndGameController implements Initializable {
     public Label winnerText;
 
     @FXML
-    public Label numberOfWins;
+    public Label numberOfWinsText;
 
     private String winner;
     private String loser;
+    private int numberOfWins;
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
@@ -56,9 +51,10 @@ public class EndGameController implements Initializable {
     public void init(GameResult gameResult) {
         this.winner = gameResult.getWinner();
         this.loser = gameResult.getLoser();
+        postData();
         getData();
-        numberOfWins.setText(winner);
-
+        winnerText.setText(winner + " Has Won The Game!");
+        numberOfWinsText.setText(winner + " Has won over " + loser + " " + numberOfWins + "x Times!");
     }
 
     public void returnButton(ActionEvent event){
@@ -74,10 +70,26 @@ public class EndGameController implements Initializable {
         }
     }
 
-
-    public FinalInfo getData() {
+    private void postData() {
         ObjectMapper mapper = new ObjectMapper();
         HttpClient client = HttpClient.newHttpClient();
+
+        try {
+            String JSON = mapper.writeValueAsString(new GameResult(winner, loser));
+            HttpRequest request = HttpRequest.newBuilder()
+                    .header("Content-Type", "application/json")
+                    .POST(HttpRequest.BodyPublishers.ofString(JSON))
+                    .uri(URI.create("http://localhost:9999"))
+                    .build();
+            HttpResponse<Void> response = client.send(request, HttpResponse.BodyHandlers.discarding());
+        } catch (IOException | InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private FinalInfo getData() {
+        HttpClient client = HttpClient.newHttpClient();
+        ObjectMapper mapper = new ObjectMapper();
 
         try {
             String JSON = mapper.writeValueAsString(new GameResult(winner, loser));

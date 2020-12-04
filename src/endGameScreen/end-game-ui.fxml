@@ -23,14 +23,10 @@
                     <Font name="System Bold" size="24.0" />
                 </font>
             </Label>
-            <Label fx:id="winnerText" layoutX="12.0" layoutY="82.0" prefHeight="27.0" prefWidth="260.0" textAlignment="CENTER">
+            <Label fx:id="winnerText" alignment="CENTER" layoutX="34.0" layoutY="82.0" prefHeight="95.0" prefWidth="211.0" textAlignment="CENTER" textOverrun="CENTER_ELLIPSIS" />
+            <Label fx:id="numberOfWinsText" alignment="CENTER" layoutX="37.0" layoutY="178.0" prefHeight="101.0" prefWidth="219.0" textOverrun="CENTER_WORD_ELLIPSIS" wrapText="true">
                 <font>
-                    <Font size="18.0" />
-                </font>
-            </Label>
-            <Label fx:id="numberOfWins" layoutX="3.0" layoutY="178.0" prefHeight="27.0" prefWidth="264.0">
-                <font>
-                    <Font size="18.0" />
+                    <Font size="13.0" />
                 </font>
             </Label>
             <Button fx:id="returnButton" contentDisplay="CENTER" layoutX="94.0" layoutY="289.0" mnemonicParsing="false" onAction="#returnButton" prefHeight="43.0" prefWidth="89.0" style="-fx-background-color: #92B8DE; -fx-border-color: #000000;" text="Main Menu" />
