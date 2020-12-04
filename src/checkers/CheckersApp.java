@@ -1,12 +1,16 @@
 package checkers;
 
+import endGameScreen.EndGameController;
+import endGameScreen.GameResult;
 import javafx.application.Application;
+import javafx.fxml.FXMLLoader;
 import javafx.scene.Group;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
-import javax.swing.JOptionPane;
+
+import java.io.IOException;
 
 public class CheckersApp extends Application
 {
@@ -14,6 +18,12 @@ public class CheckersApp extends Application
     public static final int TILE_SIZE = 100;
     public static final int WIDTH = 8;
     public static final int HEIGHT = 8;
+    private String redPlayer1;
+    private String whitePlayer2;
+
+    private String winner;
+    private boolean draw = false;
+
     private Stage primaryStage;
     private Tile[][] board = new Tile[WIDTH][HEIGHT];
     private Group tileGroup = new Group();
@@ -22,6 +32,12 @@ public class CheckersApp extends Application
     private int redCount;
     private int whiteCount;
     //methods
+
+    public CheckersApp(String redPlayer1, String whitePlayer2) {
+        this.redPlayer1 = redPlayer1;
+        this.whitePlayer2 = whitePlayer2;
+    }
+
     private Parent createContent()
     {
         Pane root = new Pane();
@@ -152,67 +168,77 @@ public class CheckersApp extends Application
         return null;
     }
 
-    private void checkGameEnd()
-    {
-        int result;
-        PieceType winner;
-        PieceType loser;
-        String message = "";
+    private void checkGameEnd() {
         PieceType stuck = checkStuck();
-        boolean gameOver = false;
 
-        if(this.redCount == 0 || this.whiteCount == 0) //win condition by enemy has no more pieces
+        if (this.redCount >= 0 || this.whiteCount == 0) //win condition by enemy has no more pieces
         {
-            winner = (this.redCount == 0 ? PieceType.WHITE : PieceType.RED);
-            loser = (this.redCount == 0 ? PieceType.RED : PieceType.WHITE);
-            message = "Team "+winner.name()+" Won!\nTeam "+loser.name()+" Lost.\n";
-            gameOver = true;
-        }
-        else if( stuck != null)
-        {
+            if (whiteCount > 0) {
+                winner = whitePlayer2;
+            } else {
+                winner = redPlayer1;
+            }
 
-            message = "Team "+stuck.name()+" is stuck\n";
-            if(this.redCount == this.whiteCount)
-                message += "Even number of pieces on both sides\nGame is a draw!";
-            else
-            {
-                winner = (this.redCount > this.whiteCount ? PieceType.RED : PieceType.WHITE);
-                loser = (this.redCount > this.whiteCount ? PieceType.WHITE : PieceType.RED);
-                message += "Team " + winner + " has more Pieces\n";
-                message += "Team "+winner+" Won!\nTeam "+loser+" Lost.\n";
+            launchEndGame();
+
+        } else if (stuck != null) {
+            if (this.redCount == this.whiteCount) {
+                draw = true;
             }
-            gameOver = true;
+            else if(whiteCount > redCount) {
+                  winner = whitePlayer2;
+            } else {
+                  winner = redPlayer1;
+              }
+
+            launchEndGame();
         }
-        if(gameOver)
-        {
-            message += "\nWould you like to play again?";
-            result = JOptionPane.showConfirmDialog(null, message);
-            switch (result)
-            {
-                case JOptionPane.YES_OPTION:
-                    this.restart();
-                    break;
-                case JOptionPane.NO_OPTION:
-                case JOptionPane.CANCEL_OPTION:
-                case JOptionPane.CLOSED_OPTION:
-                    this.primaryStage.close();
-                    break;
+    }
+
+    private void launchEndGame(){
+        try {
+            FXMLLoader loader = new FXMLLoader();
+            loader.setLocation(getClass().getResource("../endGameScreen/end-game-ui.fxml"));
+            loader.load();
+            EndGameController endGameController = loader.getController();
+            if(draw) {
+                endGameController.init(new GameResult("", "", draw));
             }
+            else if (winner != null && winner.equals(whitePlayer2)) {
+                endGameController.init(new GameResult(whitePlayer2, redPlayer1, draw));
+            }
+            else if (winner != null && winner.equals(redPlayer1)) {
+                endGameController.init(new GameResult(redPlayer1, whitePlayer2, draw));
+            }
+
+            Parent parent = loader.getRoot();
+            Stage stage = new Stage();
+            stage.setScene(new Scene(parent, 600, 400));
+            stage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
+
+        primaryStage.close();
     }
 
     private int toBoard(double pixel)
     {
-        return (int)(pixel + TILE_SIZE / 2) / TILE_SIZE;
+        return (int) (pixel + TILE_SIZE / 2) / TILE_SIZE;
     } //convert pixel coordinate to board coordinate
 
-    private Piece makePiece(PieceType type, int x, int y)
+    private Piece makePiece (PieceType type,int x, int y)
     {
         Piece piece = new Piece(type, x, y, this); //placing new piece
         return piece;
     }
 
     //getters
-    public Tile[][] getBoard(){return this.board;}
-    public PieceType getTurn(){return this.pieceTurn;}
+    public Tile[][] getBoard () {
+        return this.board;
+    }
+    public PieceType getTurn () {
+        return this.pieceTurn;
+    }
 }
+
