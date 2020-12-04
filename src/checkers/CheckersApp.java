@@ -108,7 +108,6 @@ public class CheckersApp extends Application
                 this.redCount--;
             if(killedPiece.getType() == PieceType.WHITE)
                 this.whiteCount--;
-            System.out.println("white: "+whiteCount+" red: "+redCount);
         }
         checkGameEnd();
     }

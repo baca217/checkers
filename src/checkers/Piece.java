@@ -1,14 +1,12 @@
 package checkers;
 
-import javafx.beans.property.Property;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.Ellipse;
 import javafx.scene.shape.Circle;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeSupport;
+import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 
 import static checkers.CheckersApp.TILE_SIZE;
 import static checkers.CheckersApp.WIDTH;
@@ -48,9 +46,14 @@ public class Piece extends StackPane
             int newX = toBoard(this.getLayoutX()); //piece coordinates
             int newY = toBoard(this.getLayoutY());
             MoveResult result;
+            PieceType curTurn = this.appRef.getTurn();
 
-            if (newX < 0 || newY < 0 || newX >= WIDTH || newY >= HEIGHT || this.appRef.getTurn() != this.type)
+            if (newX < 0 || newY < 0 || newX >= WIDTH || newY >= HEIGHT || curTurn != this.type)
             {//checks bounds of move
+                if(curTurn != this.type)
+                {
+                    JOptionPane.showMessageDialog(null, "Currently team "+curTurn.name()+"\'s turn!");
+                }
                 result = new MoveResult(MoveType.NONE);
             } else {//check move validity
                 result = tryMove(newX, newY);
@@ -95,7 +98,7 @@ public class Piece extends StackPane
     {
         Tile[][] board = this.appRef.getBoard();
 
-        if(newX < 0 || newX > WIDTH - 1 || newY < 0 || newY > HEIGHT - 1 )
+        if(newX < 0 || newX > WIDTH - 1 || newY < 0 || newY > HEIGHT - 1 ) //boundary checking
             return new MoveResult(MoveType.NONE);
 
         if (board[newX][newY].hasPiece() || (newX + newY) % 2 == 0) //no move on odd tiles
