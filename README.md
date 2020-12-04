@@ -31,6 +31,17 @@ Getting and using JavaFX
 8. press okay
 9. JavaFX should be ready to use
 
+API
+------------------
+link: https://github.com/tidaeu/checkers-api-OOP
+1. Download repo
+2. Open in intellij by selecting the pom.xml and "Import as Project"
+3. Install docker and pull Postgres (https://hub.docker.com/_/postgres)
+4. Confirm Postgres is pointing to port 5432
+5. Create Database named "checkers_platform"
+6. Start API in IntellJ. API will be pointing to serverport 9999
+7. All configurable settings can be found in resources/application.properties
+
 Resources
 ------------------
 Youtube tutorial playlist for javaFX: https://youtu.be/FLkOX4Eez6o  
