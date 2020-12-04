@@ -5,6 +5,11 @@ This project is meant our knowledge and understanding of object oriented topics 
 This project used a game state pattern to keep track of tile pieces, aggregation for tracking pieces on each tile, and a composition
 relationship for 64 tiles that the CheckersApp class needs in order to work.
 
+Video and Document
+------------------
+Document: https://docs.google.com/document/d/1JiNVNZUEqjJc7C2XHqHgQ5pG9Xcgt_PfUs5oGSfMMIg/edit?usp=sharing
+Video: 
+
 How to use?
 ------------------
 Main function class can be found under  
