@@ -17,7 +17,19 @@ By running the main function the program will open a dialog for inputting the na
 Once that has been done a checkers board will appear where the two players can play a game of checkers.  
 Object files for the checkers game can be found under checkers/src/checkers.  
 Object files for the end game screen can be found under checkers/src/endGameScreen.  
-Object files for the login screen can be found under checkers/src/login.  
+Object files for the login screen can be found under checkers/src/login.
+
+Getting and using JavaFX
+-------------------
+1. Download JavaFX 11 from here : https://gluonhq.com/products/javafx/  
+2. place it in a directory that you know  
+3. In the file project in intellij, click the "File" tab at the top left corner  
+4. Click on the "Project Structure" tab  
+5. On the "Libraries" tab, click the "+" sign  
+6. Click "Java"
+7. enter the directory where the JavaFX library is located at. EX: C:\Users\User\Documents\JDKs\openjfx-11.0.2_windows-x64_bin-sdk\javafx-sdk-11.0.2\lib  
+8. press okay
+9. JavaFX should be ready to use
 
 Resources
 ------------------
