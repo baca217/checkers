@@ -14,7 +14,7 @@ How to use?
 ------------------
 Main function class can be found under checkers/src/checkersGame.java  
 By running the main function the program will open a dialog for inputting the names of the players.  
-Once that has been done a checkers board will appear will the two players can play a game of checkers.  
+Once that has been done a checkers board will appear where the two players can play a game of checkers.  
 Object files for the checkers game can be found under checkers/src/checkers.  
 Object files for the end game screen can be found under checkers/src/endGameScreen.  
 Object files for the login screen can be found under checkers/src/login.  
