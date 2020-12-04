@@ -9,9 +9,7 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
-import javafx.stage.StageStyle;
 
-import javax.swing.JOptionPane;
 import java.io.IOException;
 
 public class CheckersApp extends Application
@@ -22,6 +20,10 @@ public class CheckersApp extends Application
     public static final int HEIGHT = 8;
     private String redPlayer1;
     private String whitePlayer2;
+
+    private String winner;
+    private boolean draw = false;
+
     private Stage primaryStage;
     private Tile[][] board = new Tile[WIDTH][HEIGHT];
     private Group tileGroup = new Group();
@@ -29,7 +31,6 @@ public class CheckersApp extends Application
     private PieceType pieceTurn = PieceType.RED;
     private int redCount;
     private int whiteCount;
-
     //methods
 
     public CheckersApp(String redPlayer1, String whitePlayer2) {
@@ -113,76 +114,131 @@ public class CheckersApp extends Application
         Piece temp = board[oldX][oldY].getPiece();
         board[oldX][oldY].setPiece(null); //remove piece from tile
         board[newX][newY].setPiece(temp);//place piece on new tile
-        System.out.println(newX+","+newY);
         this.pieceTurn = (PieceType.RED == this.pieceTurn ? PieceType.WHITE : PieceType.RED);
 
         if(killedPiece != null)
         {
-            System.out.println("white: "+whiteCount+" red: "+redCount);
             board[toBoard(killedPiece.getOldX())][toBoard(killedPiece.getOldY())].setPiece(null);//remove the piece from tile
             pieceGroup.getChildren().remove(killedPiece); //remove piece from group
-            checkGameEnd(killedPiece.getType());
+            if(killedPiece.getType() == PieceType.RED)
+                this.redCount--;
+            if(killedPiece.getType() == PieceType.WHITE)
+                this.whiteCount--;
         }
+        checkGameEnd();
     }
 
-    private void checkStuck(PieceType color)
+    private PieceType checkStuck()
     {
+        boolean redStuck = true;
+        boolean whiteStuck = true;
         for(int x = 0; x < WIDTH; x++)
         {
             for(int y = 0; y < HEIGHT; y++)
             {
-                Piece temp = board[x][y].getPiece();
-                if(temp != null && temp.getType() == color)
+                Piece temp = board[x][y].getPiece(); //checking if piece exists
+                if(temp != null)
                 {
+                    int curX = toBoard(temp.getOldX());
+                    int curY = toBoard(temp.getOldY());
+                    int movDir = (temp.getType() == PieceType.RED ? 1 : -1);
+                    int loop = (temp.getKingStatus() == true ? 2 : 1);
 
+                    for(int i = 0 ; i < loop; i++)
+                    {
+                        if(temp.tryMove(curX-1, curY+movDir).getType() != MoveType.NONE ||
+                                temp.tryMove(curX+1, curY+movDir).getType() != MoveType.NONE ||
+                                temp.tryMove(curX-2, curY+(movDir*2)).getType() != MoveType.NONE ||
+                                temp.tryMove(curX+2, curY+(movDir*2)).getType() != MoveType.NONE)
+                        {
+                            if (temp.getType() == PieceType.RED && redStuck == true)
+                                redStuck = false;
+                            else if (temp.getType() == PieceType.WHITE && whiteStuck == true)
+                                whiteStuck = false;
+                        }
+                        movDir *= -1;
+                    }
                 }
             }
+        }
+        if(redStuck)
+            return PieceType.RED;
+        if(whiteStuck)
+            return  PieceType.WHITE;
+        return null;
+    }
+
+    private void checkGameEnd() {
+        PieceType stuck = checkStuck();
+
+        if (this.redCount >= 0 || this.whiteCount == 0) //win condition by enemy has no more pieces
+        {
+            if (whiteCount > 0) {
+                winner = whitePlayer2;
+            } else {
+                winner = redPlayer1;
+            }
+
+            launchEndGame();
+
+        } else if (stuck != null) {
+            if (this.redCount == this.whiteCount) {
+                draw = true;
+            }
+            else if(whiteCount > redCount) {
+                  winner = whitePlayer2;
+            } else {
+                  winner = redPlayer1;
+              }
+
+            launchEndGame();
         }
     }
 
-    private void checkGameEnd(PieceType killed) {
-        int result;
-        if(killed == PieceType.RED)
-            this.redCount--;
-        if(killed == PieceType.WHITE)
-            this.whiteCount--;
-        if(this.redCount >= 0 || this.whiteCount == 0)
-        {
-            primaryStage.close();
-
-            try {
-                FXMLLoader loader = new FXMLLoader();
-                loader.setLocation(getClass().getResource("../endGameScreen/end-game-ui.fxml"));
-                loader.load();
-                EndGameController endGameController = loader.getController();
-                if(whiteCount > 0) {
-                    endGameController.init(new GameResult(whitePlayer2, redPlayer1));
-                } else {
-                    endGameController.init(new GameResult(redPlayer1, whitePlayer2));
-                }
-                Parent parent = loader.getRoot();
-                Stage stage = new Stage();
-                stage.setScene(new Scene(parent, 600, 400));
-                stage.show();
-            } catch (IOException e) {
-                e.printStackTrace();
+    private void launchEndGame(){
+        try {
+            FXMLLoader loader = new FXMLLoader();
+            loader.setLocation(getClass().getResource("../endGameScreen/end-game-ui.fxml"));
+            loader.load();
+            EndGameController endGameController = loader.getController();
+            if(draw) {
+                endGameController.init(new GameResult("", "", draw));
+            }
+            else if (winner != null && winner.equals(whitePlayer2)) {
+                endGameController.init(new GameResult(whitePlayer2, redPlayer1, draw));
+            }
+            else if (winner != null && winner.equals(redPlayer1)) {
+                endGameController.init(new GameResult(redPlayer1, whitePlayer2, draw));
             }
 
+            Parent parent = loader.getRoot();
+            Stage stage = new Stage();
+            stage.setScene(new Scene(parent, 600, 400));
+            stage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
+
+        primaryStage.close();
     }
 
     private int toBoard(double pixel)
     {
-        return (int)(pixel + TILE_SIZE / 2) / TILE_SIZE;
+        return (int) (pixel + TILE_SIZE / 2) / TILE_SIZE;
     } //convert pixel coordinate to board coordinate
 
-    private Piece makePiece(PieceType type, int x, int y)
+    private Piece makePiece (PieceType type,int x, int y)
     {
         Piece piece = new Piece(type, x, y, this); //placing new piece
         return piece;
     }
 
     //getters
-    public Tile[][] getBoard(){return this.board;}
-    public PieceType getTurn(){return this.pieceTurn;}
+    public Tile[][] getBoard () {
+        return this.board;
+    }
+    public PieceType getTurn () {
+        return this.pieceTurn;
+    }
 }
+

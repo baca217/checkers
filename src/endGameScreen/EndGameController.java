@@ -1,6 +1,5 @@
 package endGameScreen;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -39,6 +38,7 @@ public class EndGameController implements Initializable {
 
     private String winner;
     private String loser;
+    private boolean draw;
     private int numberOfWins;
 
     @Override
@@ -51,10 +51,19 @@ public class EndGameController implements Initializable {
     public void init(GameResult gameResult) {
         this.winner = gameResult.getWinner();
         this.loser = gameResult.getLoser();
-        postData();
-        getData();
-        winnerText.setText(winner + " Has Won The Game!");
-        numberOfWinsText.setText(winner + " Has won over " + loser + " " + numberOfWins + "x Times!");
+        this.draw = gameResult.isDraw();
+        if(draw) {
+            winnerText.setText("This was a draw! No data has been saved");
+        } else {
+            postData();
+            getData();
+            winnerText.setText(winner + " Has Won The Game!");
+            String times = "Times";
+            if(numberOfWins < 2) {
+                times = "Time";
+            }
+            numberOfWinsText.setText(winner + " Has won over " + loser + " " + numberOfWins + "x " + times + "!");
+        }
     }
 
     public void returnButton(ActionEvent event){
@@ -75,24 +84,24 @@ public class EndGameController implements Initializable {
         HttpClient client = HttpClient.newHttpClient();
 
         try {
-            String JSON = mapper.writeValueAsString(new GameResult(winner, loser));
+            String JSON = mapper.writeValueAsString(new GameResult(winner, loser, draw));
             HttpRequest request = HttpRequest.newBuilder()
                     .header("Content-Type", "application/json")
                     .POST(HttpRequest.BodyPublishers.ofString(JSON))
                     .uri(URI.create("http://localhost:9999"))
                     .build();
-            HttpResponse<Void> response = client.send(request, HttpResponse.BodyHandlers.discarding());
+            client.send(request, HttpResponse.BodyHandlers.discarding());
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
         }
     }
 
-    private FinalInfo getData() {
+    private void getData() {
         HttpClient client = HttpClient.newHttpClient();
         ObjectMapper mapper = new ObjectMapper();
 
         try {
-            String JSON = mapper.writeValueAsString(new GameResult(winner, loser));
+            String JSON = mapper.writeValueAsString(new GameResult(winner, loser, draw));
             HttpRequest request = HttpRequest.newBuilder()
                     .GET()
                     .uri(URI.create("http://localhost:9999" + "/" + winner + "/" + loser))
@@ -101,13 +110,13 @@ public class EndGameController implements Initializable {
 
             FinalInfo finalinfo = mapper.readValue(response.body(), FinalInfo.class);
             numberOfWins = finalinfo.getWinsOverLoser();
-            
-            return finalinfo;
+
+            return;
 
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
         }
 
-        return new FinalInfo(winner, -1);
+        new FinalInfo(winner, -1);
     }
 }

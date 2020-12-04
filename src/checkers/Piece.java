@@ -1,14 +1,12 @@
 package checkers;
 
-import javafx.beans.property.Property;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.Ellipse;
 import javafx.scene.shape.Circle;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeSupport;
+import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 
 import static checkers.CheckersApp.TILE_SIZE;
 import static checkers.CheckersApp.WIDTH;
@@ -29,7 +27,7 @@ public class Piece extends StackPane
         this.type = type;
         this.king = false;
         this.appRef = app;
-        this.kingPos = (type == PieceType.RED ? HEIGHT - 1 : 0);
+        this.kingPos = (type == PieceType.RED ? (HEIGHT - 1) * TILE_SIZE : 0);
         move(x, y); //initial position
 
         Circle shape = new Circle(); //creating graphic for checkers piece
@@ -48,12 +46,17 @@ public class Piece extends StackPane
             int newX = toBoard(this.getLayoutX()); //piece coordinates
             int newY = toBoard(this.getLayoutY());
             MoveResult result;
+            PieceType curTurn = this.appRef.getTurn();
 
-            if (newX < 0 || newY < 0 || newX >= WIDTH || newY >= HEIGHT || this.appRef.getTurn() != this.type)
+            if (newX < 0 || newY < 0 || newX >= WIDTH || newY >= HEIGHT || curTurn != this.type)
             {//checks bounds of move
+                if(curTurn != this.type)
+                {
+                    JOptionPane.showMessageDialog(null, "Currently team "+curTurn.name()+"\'s turn!");
+                }
                 result = new MoveResult(MoveType.NONE);
             } else {//check move validity
-                result = tryMove(this, newX, newY, this.appRef.getBoard());
+                result = tryMove(newX, newY);
             }
 
             int x0 = toBoard(this.getOldX()); //old coordinates
@@ -91,16 +94,21 @@ public class Piece extends StackPane
         return (int)(pixel + TILE_SIZE / 2) / TILE_SIZE;
     } //convert pixel coordinate to board coordinate
 
-    private MoveResult tryMove(Piece piece, int newX, int newY, Tile[][] board)
+    public MoveResult tryMove(int newX, int newY)
     {
+        Tile[][] board = this.appRef.getBoard();
+
+        if(newX < 0 || newX > WIDTH - 1 || newY < 0 || newY > HEIGHT - 1 ) //boundary checking
+            return new MoveResult(MoveType.NONE);
+
         if (board[newX][newY].hasPiece() || (newX + newY) % 2 == 0) //no move on odd tiles
         {
             return new MoveResult(MoveType.NONE);
         }
 
-        int x0 = toBoard(piece.getOldX());
-        int y0 = toBoard(piece.getOldY());
-        if(piece.getKingStatus())
+        int x0 = toBoard(this.getOldX());
+        int y0 = toBoard(this.getOldY());
+        if(this.getKingStatus())
         {//piece is a king, can move in any direction
             if (Math.abs(newX - x0) == 1 && Math.abs(newY - y0) == 1)
             { //check if move is valid
@@ -109,7 +117,7 @@ public class Piece extends StackPane
             {//check if kill move is valid
                 int x1 = x0 + (newX - x0) / 2;
                 int y1 = y0 + (newY - y0) / 2;
-                if (board[x1][y1].hasPiece() && board[x1][y1].getPiece().getType() != piece.getType())
+                if (board[x1][y1].hasPiece() && board[x1][y1].getPiece().getType() != this.getType())
                 {//check if piece exists and is an enemy
                     return new MoveResult(MoveType.KILL, board[x1][y1].getPiece());//remove enemy
                 }
@@ -117,14 +125,14 @@ public class Piece extends StackPane
         }
         else
         {//piece is not king, must check move direction
-            if (Math.abs(newX - x0) == 1 && newY - y0 == piece.getType().moveDir)
+            if (Math.abs(newX - x0) == 1 && newY - y0 == this.getType().moveDir)
             { //check if move is valid
                 return new MoveResult(MoveType.NORMAL);
-            } else if (Math.abs(newX - x0) == 2 && newY - y0 == piece.getType().moveDir * 2)
+            } else if (Math.abs(newX - x0) == 2 && newY - y0 == this.getType().moveDir * 2)
             {//check if kill move is valid
                 int x1 = x0 + (newX - x0) / 2;
                 int y1 = y0 + (newY - y0) / 2;
-                if (board[x1][y1].hasPiece() && board[x1][y1].getPiece().getType() != piece.getType())
+                if (board[x1][y1].hasPiece() && board[x1][y1].getPiece().getType() != this.getType())
                 {//check if piece exists and is an enemy
                     return new MoveResult(MoveType.KILL, board[x1][y1].getPiece());//remove enemy
                 }
